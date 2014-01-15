@@ -1,0 +1,2265 @@
+<?xml version='1.0'?>
+
+<!-- 
+Copyright © 2004-2006 by Idiom Technologies, Inc. All rights reserved. 
+IDIOM is a registered trademark of Idiom Technologies, Inc. and WORLDSERVER
+and WORLDSTART are trademarks of Idiom Technologies, Inc. All other 
+trademarks are the property of their respective owners. 
+
+IDIOM TECHNOLOGIES, INC. IS DELIVERING THE SOFTWARE "AS IS," WITH 
+ABSOLUTELY NO WARRANTIES WHATSOEVER, WHETHER EXPRESS OR IMPLIED,  AND IDIOM
+TECHNOLOGIES, INC. DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+PURPOSE AND WARRANTY OF NON-INFRINGEMENT. IDIOM TECHNOLOGIES, INC. SHALL NOT
+BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, COVER, PUNITIVE, EXEMPLARY,
+RELIANCE, OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT LIMITED TO LOSS OF 
+ANTICIPATED PROFIT), ARISING FROM ANY CAUSE UNDER OR RELATED TO  OR ARISING 
+OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF IDIOM
+TECHNOLOGIES, INC. HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. 
+
+Idiom Technologies, Inc. and its licensors shall not be liable for any
+damages suffered by any person as a result of using and/or modifying the
+Software or its derivatives. In no event shall Idiom Technologies, Inc.'s
+liability for any damages hereunder exceed the amounts received by Idiom
+Technologies, Inc. as a result of this transaction.
+
+These terms and conditions supersede the terms and conditions in any
+licensing agreement to the extent that such terms and conditions conflict
+with those set forth herein.
+
+This file is part of the DITA Open Toolkit project hosted on Sourceforge.net. 
+See the accompanying license.txt file for applicable licenses.
+-->
+
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:fo="http://www.w3.org/1999/XSL/Format" 
+    xmlns:file="http://www.jclark.com/xt/java/java.io.File"
+    xmlns:opentopic-mapmerge="http://www.idiominc.com/opentopic/mapmerge"
+    xmlns:exsl="http://exslt.org/common"
+    xmlns:exslf="http://exslt.org/functions"
+    xmlns:opentopic-func="http://www.idiominc.com/opentopic/exsl/function"
+    exclude-result-prefixes="opentopic-mapmerge opentopic-func exslf exsl"
+    version="1.1">
+     <xsl:include href="../../../xsl/fo/index.xsl"/>
+    <xsl:attribute-set name="chapterNumerationFont">
+        <xsl:attribute name="font-family">Arial Black</xsl:attribute>
+        <xsl:attribute name="font-size">12pt</xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="numerationFont">
+        <xsl:attribute name="font-family">Arial</xsl:attribute>
+        <xsl:attribute name="font-size">10pt</xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="baseFont">
+        <xsl:attribute name="language">zh-CN</xsl:attribute>
+        <xsl:attribute name="country">zh-CN</xsl:attribute>
+        <xsl:attribute name="font-family">SIMSUN</xsl:attribute>
+        <xsl:attribute name="font-size">10pt</xsl:attribute>
+    </xsl:attribute-set>
+     <xsl:attribute-set name="boldFont">
+        <xsl:attribute name="language">zh-CN</xsl:attribute>
+        <xsl:attribute name="country">zh-CN</xsl:attribute>
+        <xsl:attribute name="font-family">SimHei</xsl:attribute>
+        <xsl:attribute name="font-size">10pt</xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="standardTable">
+       <xsl:attribute name="border">solid 0.5pt black</xsl:attribute>
+        <xsl:attribute name="width">100%</xsl:attribute>
+        <xsl:attribute name="table-layout">fixed</xsl:attribute>
+        <xsl:attribute name="border-collapse">collapse</xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="standardTableNoBorder">
+        <xsl:attribute name="width">100%</xsl:attribute>
+        <xsl:attribute name="table-layout">fixed</xsl:attribute>
+        <xsl:attribute name="border-collapse">collapse</xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="tableCellBorder">
+        <xsl:attribute name="border-top">solid 0.5pt black</xsl:attribute>
+        <xsl:attribute name="border-bottom">solid 0.5pt black</xsl:attribute>
+        <xsl:attribute name="border-right">solid 0.5pt black</xsl:attribute>
+        <xsl:attribute name="border-left">solid 0.5pt black</xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="warningHeader">
+        <xsl:attribute name="background-color">
+            <xsl:value-of select="$gray"/>
+        </xsl:attribute>
+    </xsl:attribute-set>
+
+    <xsl:attribute-set name="pageFormat">
+        <xsl:attribute name="page-width">216mm</xsl:attribute>
+        <xsl:attribute name="page-height">303mm</xsl:attribute>
+    </xsl:attribute-set>
+
+<xsl:attribute-set name="xref">
+    <xsl:attribute name="color"><xsl:value-of select="$red"/></xsl:attribute>
+    <xsl:attribute name="font-style">normal</xsl:attribute>
+</xsl:attribute-set>
+
+    <xsl:param name="artworkPath">C:/DITASAMPLE_GARAGE_SOURCE/</xsl:param>
+
+    <xsl:variable name="black">rgb-icc(0, 0,0, #CMYK, 0, 0, 0.0, 1.0)</xsl:variable>
+    <xsl:variable name="white">rgb-icc(255, 255, 255, #CMYK, 0, 0, 0.0, 0)</xsl:variable>
+    <xsl:variable name="gray">rgb-icc(189,189,189, #CMYK,0.25,0.2,0.2,0)</xsl:variable>
+    <xsl:variable name="darkGray">rgb-icc(122,122,122, #CMYK,0.53,0.45,0.44,0.09)</xsl:variable>
+    <xsl:variable name="red">rgb-icc(204,34,41, #CMYK,0,1.0,1.0,0)</xsl:variable>
+
+
+    <xsl:param name="xrefPageEnd">页</xsl:param>
+    <xsl:param name="xrefConceptStart">章节见</xsl:param>
+    <xsl:param name="xrefConceptEnd">页</xsl:param>
+    <xsl:param name="xreffigStart">插图见</xsl:param>
+    <xsl:param name="xreffigEnd">页</xsl:param>    
+    <xsl:param name="xreftableStart">表格见</xsl:param>
+    <xsl:param name="xreftableEnd">页</xsl:param> 
+    
+    
+
+    <xsl:param name="noteHeadColor">rgb-icc(0176,178,180, #CMYK, 0, 0, 0.0, 0.35)</xsl:param>
+    <xsl:param name="cautionHeadColor">rgb-icc(118,120, 122, #CMYK, 0, 0, 0.0, 0.65)</xsl:param>
+    <xsl:param name="warningHeadColor">rgb-icc(78,78,80, #CMYK, 0, 0, 0.0, 0.85)</xsl:param>
+    
+    <xsl:template name="rootTemplate">
+        <xsl:call-template name="validateTopicRefs"/>
+        
+        <fo:root xsl:use-attribute-sets="__fo__root">
+            
+            <xsl:comment>
+                <xsl:text>Layout masters = </xsl:text>
+                <xsl:value-of select="$layout-masters"/>
+            </xsl:comment>
+          
+            <xsl:call-template name="createLayoutMasters"/> 
+             <xsl:call-template name="createFrontMatter"/>
+            <!--add for the content table page -->
+             <xsl:call-template name="createToc"/>
+             <xsl:call-template name="createIndex"/>
+             <!--add for the preface  -->
+
+
+            <xsl:apply-templates/>
+        </fo:root>
+    </xsl:template>
+     
+     
+    <xsl:template name="insertBodyStaticContents">
+        <xsl:param name="partNumber"/>
+        <xsl:param name="partTitle"/>
+        <xsl:param name="position"/>
+        <xsl:call-template name="insertBodyOddFooter"><xsl:with-param name="partTitle" select="$partTitle"/><xsl:with-param name="partNumber" select="$partNumber"/></xsl:call-template>
+        <xsl:call-template name="insertBodyEvenFooter"><xsl:with-param name="partTitle" select="$partTitle"/><xsl:with-param name="partNumber" select="$partNumber"/></xsl:call-template>
+        <xsl:call-template name="insertBodyOddHeader"/>
+        <xsl:call-template name="insertBodyEvenHeader"/>
+        <xsl:call-template name="insertBodyEvenStart"><xsl:with-param name="partNumber" select="$partNumber"/><xsl:with-param name="position" select="$position"/></xsl:call-template>
+        <xsl:call-template name="insertBodyOddEnd"><xsl:with-param name="partNumber" select="$partNumber"/><xsl:with-param name="position" select="$position"/></xsl:call-template>
+  
+        <!-- 
+            <xsl:call-template name="insertBodyFootnoteSeparator"/>        
+            <xsl:call-template name="insertBodyFirstHeader"/>
+            <xsl:call-template name="insertBodyFirstFooter"/>
+            <xsl:call-template name="insertBodyLastHeader"/>
+            <xsl:call-template name="insertBodyLastFooter"/> -->
+    </xsl:template>
+      <xsl:template name="insertBodyOddHeader">
+        
+        <fo:static-content flow-name="odd-body-header">
+          <fo:block-container position="absolute" bottom="1mm" left="0mm" height="14mm" width="170mm"
+                display-align="after" xsl:use-attribute-sets="boldFont" text-align="end">
+                <fo:block font-size="9pt" >广汽传祺轿车 2010</fo:block>
+                <fo:block font-size="9pt">
+                    <fo:inline><xsl:value-of select="//booktitlealt"/></fo:inline>
+                    <fo:inline> 10.2010</fo:inline>
+                </fo:block>
+            </fo:block-container>
+            
+              <fo:block-container  top="4mm" left="0mm"
+                height="10mm" width="16mm" display-align="center" position="absolute" text-align="center">
+                <fo:block font-size="9pt"></fo:block>
+            </fo:block-container>  
+            
+            
+            <!--    <fo:block xsl:use-attribute-sets="__body__even__header">
+                <xsl:call-template name="insertVariable">
+                <xsl:with-param name="theVariableID" select="'Body even header'"/>
+                <xsl:with-param name="theParameters">
+                <prodname>
+                <xsl:value-of select="$productName"/>
+                </prodname>
+                <heading>
+                <fo:inline xsl:use-attribute-sets="__body__even__header__heading">
+                <fo:retrieve-marker retrieve-class-name="current-header"/>
+                </fo:inline>
+                </heading>
+                <pagenum>
+                <fo:inline xsl:use-attribute-sets="__body__even__header__pagenum">
+                <fo:page-number/>
+                </fo:inline>
+                </pagenum>
+                </xsl:with-param>
+                </xsl:call-template>
+                </fo:block> -->
+            
+        </fo:static-content>
+        
+    </xsl:template>
+    
+    <xsl:template name="insertBodyEvenHeader">
+        
+        <fo:static-content flow-name="even-body-header">
+            <fo:block-container position="absolute" bottom="1mm" left="0mm" height="14mm" width="150mm"
+                display-align="after" xsl:use-attribute-sets="boldFont" text-align="start">
+                <fo:block font-size="9pt">广汽传祺轿车 2010</fo:block>
+                <fo:block font-size="9pt">
+                    <!--<fo:inline><xsl:value-of select="//mainbooktitle"/></fo:inline>-->
+                    <fo:inline><xsl:value-of select="//booktitlealt"/></fo:inline>
+                    <fo:inline> 10.2010</fo:inline>
+                </fo:block>
+            </fo:block-container>
+            <xsl:comment>this following block container is for the logo image. deleted because the customer wish to place their logo manually.</xsl:comment>
+            <fo:block-container top="4mm" left="153mm"
+                height="10mm" width="16mm" display-align="center" position="absolute" text-align="center">
+                <fo:block font-size="9pt"></fo:block>
+            </fo:block-container>
+            
+            <!--            <fo:block xsl:use-attribute-sets="__body__odd__header">
+                
+                
+                
+                <xsl:call-template name="insertVariable">
+                <xsl:with-param name="theVariableID" select="'Body odd header'"/>
+                <xsl:with-param name="theParameters">
+                <prodname>
+                <xsl:value-of select="$productName"/>
+                </prodname>
+                <heading>
+                <fo:inline xsl:use-attribute-sets="__body__odd__header__heading">
+                <fo:retrieve-marker retrieve-class-name="current-header"/>
+                </fo:inline>
+                </heading>
+                <pagenum>
+                <fo:inline xsl:use-attribute-sets="__body__odd__header__pagenum">
+                <fo:page-number/>
+                </fo:inline>
+                </pagenum>
+                </xsl:with-param>
+                </xsl:call-template>
+                </fo:block> -->
+        </fo:static-content>
+        
+    </xsl:template>
+    
+  
+    <xsl:template name="insertBodyOddFooter">
+        <xsl:param name="partTitle"/>
+        <xsl:param name="partNumber"/>
+        <fo:static-content flow-name="odd-body-footer">
+            <fo:block-container position="absolute" bottom="0mm" left="0mm" height="17mm"
+                width="170mm" display-align="after" text-align="center" padding="0mm">
+                <fo:block-container position="absolute" bottom="7mm" left="0mm"
+                    height="10mm" width="170mm" display-align="before" text-align="center"
+                    margin="0mm">
+                    <fo:block font-size="9pt" font-weight="bold">
+                        <fo:page-number/>
+                    </fo:block>
+                </fo:block-container>
+                
+                <fo:block-container position="absolute" bottom="7.4mm" left="0mm"
+                    height="10mm" width="50mm" display-align="before" text-align="start"
+                    margin="0mm"  xsl:use-attribute-sets="boldFont">
+                    <fo:block font-size="9pt" text-align="start">
+                    <fo:inline>
+                                             <xsl:text>修理组 </xsl:text>                                         
+                      </fo:inline>
+                      <fo:inline><xsl:value-of select="$partNumber"/></fo:inline>
+                      <fo:inline ><xsl:text> - </xsl:text></fo:inline>
+                       <fo:inline><xsl:value-of select="$partTitle"/>
+                        </fo:inline>
+                      </fo:block>                      
+                </fo:block-container>
+                
+            </fo:block-container>
+
+        </fo:static-content>
+        
+    </xsl:template>
+    
+    <xsl:template name="insertBodyEvenFooter">
+         <xsl:param name="partTitle"/>
+        <xsl:param name="partNumber"/>
+        <fo:static-content flow-name="even-body-footer">
+            <fo:block-container position="absolute" bottom="0mm" left="0mm" height="17mm"
+                width="170mm" display-align="before" text-align="center" padding="0mm">
+                <fo:block-container position="absolute" bottom="7mm" left="0mm"
+                    height="10mm" width="170mm" display-align="before" text-align="center"
+                    margin="0mm">
+                    <fo:block font-size="9pt" font-weight="bold">
+                        <fo:page-number/>
+                    </fo:block>
+                </fo:block-container>
+                
+                <fo:block-container position="absolute" bottom="7.4mm" right="0mm"
+                    height="10mm" width="50mm" display-align="before" text-align="end"
+                    margin="0mm">
+                    <fo:block font-size="9pt" text-align="end" xsl:use-attribute-sets="boldFont">
+                      <fo:inline> <xsl:text>修理组 </xsl:text></fo:inline>                     
+                      <fo:inline>
+                              <xsl:value-of select="$partNumber"/>
+                      </fo:inline>
+                       <fo:inline><xsl:text> - </xsl:text></fo:inline> 
+                     <fo:inline><xsl:value-of select="$partTitle"/></fo:inline>
+                     </fo:block>
+
+                </fo:block-container>
+                
+            </fo:block-container>
+
+        </fo:static-content>
+        
+    </xsl:template>
+    
+    
+    
+    
+    <xsl:template name="insertBodyEvenStart">
+        <xsl:param name="partNumber"/>
+        <xsl:param name="position"/>
+        <fo:static-content flow-name="even-body-start">
+            <xsl:variable name="padding"><xsl:value-of select="($position mod 22)*10"/></xsl:variable>
+             <fo:block padding-before="{concat(number($padding+14),'mm')}" padding-right="3mm" end-indent="3mm">
+                <fo:external-graphic src="url({$artworkPath}/icons/{$partNumber}.pdf)"
+                    padding-start="3mm" text-align="end" background-color="#261B17" width="17mm" content-width="17mm" height="10mm" content-height="10mm" scaling="uniform" />
+            </fo:block>
+        </fo:static-content>
+    </xsl:template>
+    
+    <xsl:template name="insertBodyOddEnd">
+        <xsl:param name="partNumber"/>
+        <xsl:param name="position"/>
+        <fo:static-content flow-name="odd-body-end">
+            <xsl:variable name="padding"><xsl:value-of select="($position mod 22)*10"/></xsl:variable>
+            <fo:block padding-before="{concat(number($padding+14),'mm')}" start-indent="3mm" padding-left="3mm">
+                <fo:external-graphic src="url({$artworkPath}/icons/{$partNumber}.pdf)" padding-end="3mm" background-color="#261B17" text-align="start" width="20mm" content-width="17mm" height="10mm" content-height="10mm" scaling="uniform"/>
+            </fo:block>
+        </fo:static-content>
+    </xsl:template>
+    
+    <!--add by liaolingling begin-->
+     
+<xsl:attribute-set name="codeblock">
+        <xsl:attribute name="white-space">pre</xsl:attribute>
+        <xsl:attribute name="wrap-option">wrap</xsl:attribute>
+        <xsl:attribute name="background-color">gainsboro</xsl:attribute>
+        <xsl:attribute name="font-family">Monospaced</xsl:attribute>
+        <xsl:attribute name="font-size">9pt</xsl:attribute>
+        <xsl:attribute name="padding">0.5em</xsl:attribute>
+        <xsl:attribute name="color">gray</xsl:attribute>
+       
+</xsl:attribute-set>
+<xsl:template match="*[contains(@class, ' topic/codeblock ')]">
+    <fo:block xsl:use-attribute-sets="codeblock">
+        <xsl:apply-templates select="text()"/>
+    </fo:block>
+</xsl:template>
+<!-- add by liaolingling end -->
+
+    <xsl:template match="*[contains(@class, ' topic/topic ')]">
+        <xsl:variable name="topicType">
+            <xsl:choose>
+                
+                <xsl:when test="parent::bookmap">topicPart</xsl:when>
+                <xsl:when test="parent::*[contains(@class, ' topic/topic ')] and parent::*/parent::bookmap">topicChapter</xsl:when>
+                <xsl:when test="self::concept[parent::*[contains(@class, ' topic/topic ')]/parent::bookmap ]">topicConcept</xsl:when>
+                <xsl:when test="self::concept[parent::concept/parent::concept/parent::*/parent::bookmap]">topicConcept2</xsl:when>
+               
+                
+                <!--  
+                    <xsl:when test="parent::bookmap">topicPart</xsl:when>
+                    <xsl:when test="parent::topic[parent::bookmap]">topicChapter</xsl:when>
+                    <xsl:when test="self::concept[parent::topic]">topicConcept</xsl:when>
+                    <xsl:when test="self::concept[parent::concept]">topicConcept2</xsl:when>
+                    <xsl:when test="self::topic[parent::topic[parent::topic[parent::bookmap]]]">topicConcept</xsl:when>
+                    
+                -->
+                
+         <xsl:otherwise>
+                    <xsl:call-template name="determineTopicType"/>
+                </xsl:otherwise>
+            </xsl:choose>
+            
+            
+        </xsl:variable>
+        
+        
+        <xsl:choose>
+            <xsl:when test="$topicType = 'topicConcept'">
+                <xsl:call-template name="processConcept"/>
+            </xsl:when>
+            <xsl:when test="$topicType = 'topicConcept2'">
+                <xsl:call-template name="processConcept2"/>
+            </xsl:when>
+            <xsl:when test="$topicType = 'topicChapter'">
+                <xsl:call-template name="processTopicChapter"/>
+            </xsl:when>
+            <xsl:when test="$topicType = 'topicPart'">
+                <xsl:call-template name="processTopicPart"/>
+            </xsl:when>
+             <xsl:when test="$topicType = 'topicAppendix'">
+                <xsl:call-template name="processTopicAppendix"/>
+            </xsl:when>           
+            
+            <xsl:when test="$topicType = 'topicPreface'">
+                <xsl:call-template name="processTopicPreface"/>
+            </xsl:when>
+            <xsl:when test="$topicType = 'topicNotices'">
+                <!-- Suppressed in normal processing, since it goes at the beginning of the book. -->
+                <!-- <xsl:call-template name="processTopicNotices"/> -->
+            </xsl:when>
+            <xsl:when test="$topicType = 'topicSimple'">
+                <xsl:variable name="page-sequence-reference">
+                    <xsl:choose>
+                        <xsl:when test="$mapType = 'bookmap'">
+                            <xsl:value-of select="'body-sequence'"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="'ditamap-body-sequence'"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:choose>
+
+                    <xsl:when test="not(ancestor::*[contains(@class,' topic/topic ')])">
+                        <fo:page-sequence master-reference="{$page-sequence-reference}" xsl:use-attribute-sets="__force__page__count">
+                            
+                            <xsl:call-template name="insertBodyStaticContents"/>                          
+                            <fo:flow flow-name="xsl-region-body">
+                                <xsl:choose>
+                                    <xsl:when test="contains(@class,' concept/concept ')"><xsl:call-template name="processConcept"/></xsl:when>
+                                    <xsl:when test="contains(@class,' task/task ')"><xsl:call-template name="processTask"/></xsl:when>
+                                    <xsl:when test="contains(@class,' reference/reference ')"><xsl:call-template name="processReference"/></xsl:when>
+                                    <xsl:otherwise><xsl:call-template name="processTopic"/></xsl:otherwise>
+                                </xsl:choose>
+                                <fo:block><xsl:value-of select="$topicType"/></fo:block>
+                            </fo:flow>
+                        </fo:page-sequence>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:choose>
+                            <xsl:when test="contains(@class,' concept/concept ')"><xsl:call-template name="processConcept"/></xsl:when>
+                            <xsl:when test="contains(@class,' task/task ')"><xsl:call-template name="processTask"/></xsl:when>
+                            <xsl:when test="contains(@class,' reference/reference ')"><xsl:call-template name="processReference"/></xsl:when>
+                            <xsl:otherwise><xsl:call-template name="processTopic"/></xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <!--BS: skipp abstract (copyright) from usual content. It will be processed from the front-matter-->
+            <xsl:when test="$topicType = 'topicAbstract'"/>
+            <xsl:otherwise>
+                <xsl:call-template name="processUnknowTopic">
+                    <xsl:with-param name="topicType" select="$topicType"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+      
+    </xsl:template>
+
+
+
+    <!--  Bookmap Part processing  -->
+    <xsl:template name="processTopicPart">
+        <xsl:call-template name="startPageNumbering"/>
+        <xsl:variable name="id" select="@id"></xsl:variable>  
+        <xsl:variable name="position">
+            <xsl:for-each select="parent::node()/child::node()[ contains(@class,'topic/topic')]">
+                <xsl:if test="self::node()[@id=$id]"><xsl:value-of select="position()"/></xsl:if>
+            </xsl:for-each>
+        </xsl:variable>  
+      <xsl:comment> start part </xsl:comment>      
+  
+        <fo:page-sequence master-reference="body-sequence"><!-- xsl:use-attribute-sets="__force__page__count" entfernt -->
+              <xsl:if test="$position = 1"><xsl:attribute name="initial-page-number">1</xsl:attribute></xsl:if>              
+            <xsl:call-template name="insertBodyStaticContents">
+                <xsl:with-param name="partNumber" select="substring(./title,1,2)"/>
+                <xsl:with-param name="partTitle" select=" substring(./title,4)"/>
+                <xsl:with-param name="position" select="$position"/>
+            </xsl:call-template>
+            <fo:flow flow-name="xsl-region-body">
+
+                <fo:block xsl:use-attribute-sets="topic">
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="@id"/>
+                    </xsl:attribute>
+                           <xsl:if test="not(ancestor::*[contains(@class, ' topic/topic ')])">
+                        <fo:marker marker-class-name="current-topic-number">
+                            <xsl:number format="I"/>
+                        </fo:marker>
+                        <fo:marker marker-class-name="current-header">
+                            <xsl:for-each select="child::*[contains(@class,' topic/title ')]">
+                                <xsl:call-template name="getTitle"/>
+                            </xsl:for-each>
+                        </fo:marker>
+                    </xsl:if>
+                    
+                    <!--                    <xsl:apply-templates select="*[not(contains(@class, ' topic/topic '))]"/>-->
+                    <xsl:call-template name="insertChapterFirstpageStaticContent">
+                        <xsl:with-param name="type" select="'part'"/>
+                    </xsl:call-template>
+                    <xsl:apply-templates/>
+                    <!--
+                    <xsl:for-each select="*[contains(@class,' bookmap/chapter ')]">
+                        <xsl:variable name="topicType">
+                            <xsl:call-template name="determineTopicType"/>
+                        </xsl:variable>
+                        <xsl:if test="$topicType = 'topicSimple'">
+                            
+                        </xsl:if>
+                    </xsl:for-each>-->
+                </fo:block>
+            </fo:flow>
+        </fo:page-sequence>
+        <xsl:comment> end part </xsl:comment>
+    </xsl:template>
+
+
+    <xsl:template name="processTopicChapter">
+
+<xsl:comment> chapter </xsl:comment>
+              
+    <fo:block page-break-after="always">
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="@id"/>
+                    </xsl:attribute>
+
+                    <xsl:if test="not(ancestor::*[contains(@class, ' topic/topic ')])">
+                        <fo:marker marker-class-name="current-topic-number">
+                            <xsl:number format="1"/>
+                        </fo:marker>
+                        <fo:marker marker-class-name="current-header">
+                            <xsl:for-each select="child::*[contains(@class,' topic/title ')]">
+                                <xsl:call-template name="getTitle"/>
+                            </xsl:for-each>
+                        </fo:marker>
+                    </xsl:if>
+                    
+                    <xsl:call-template name="insertChapterFirstpageStaticContent">
+                        <xsl:with-param name="type" select="'chapter'"/>
+                    </xsl:call-template>
+                    <xsl:apply-templates/><!-- [contains(@class,' topic/topic ')] -->
+                </fo:block>
+    </xsl:template>
+
+
+    <xsl:template name="processConcept">
+        <xsl:apply-templates select="." mode="processConcept"/>
+    </xsl:template>
+
+    <xsl:template match="*" mode="processConcept">
+        <fo:block page-break-after="always"> 
+            <xsl:call-template name="insertChapterFirstpageStaticContent">
+                <xsl:with-param name="type" select="'concept'"/>
+            </xsl:call-template>
+            <xsl:comment> concept/concept </xsl:comment>
+            <xsl:apply-templates select="." mode="commonTopicProcessing"/>
+        </fo:block>
+    </xsl:template>
+    
+    
+    
+    
+
+    <xsl:template name="processConcept2">
+        <xsl:apply-templates select="." mode="processConcept2"/>
+    </xsl:template>
+    
+    <xsl:template match="*" mode="processConcept2">
+        <fo:block>
+            <xsl:call-template name="insertChapterFirstpageStaticContent">
+                <xsl:with-param name="type" select="'concept2'"/>
+            </xsl:call-template>
+            <xsl:comment> concept/concept2 </xsl:comment>
+            <xsl:apply-templates select="." mode="commonTopicProcessing"/>
+        </fo:block>
+    </xsl:template>
+    
+    
+
+
+    <xsl:template match="*[contains(@class, ' concept/conbody ')]">
+        <fo:block id="{@id}">
+            <xsl:apply-templates/>
+        </fo:block>
+    </xsl:template>
+
+
+
+<!-- ID des Titels fliesst ein -->
+    <xsl:template match="*[contains(@class, ' topic/title ')]">
+        <xsl:variable name="id" select="parent::node()/@id"></xsl:variable>
+        <fo:block id="{$id}"></fo:block>
+    </xsl:template>
+
+    <!-- Kapitelnummer -->
+    <xsl:template name="insertChapterFirstpageStaticContent">
+        <xsl:param name="type"/>
+        <fo:block>
+            <xsl:attribute name="id">
+                <xsl:value-of select="concat('_OPENTOPIC_TOC_PROCESSING_', generate-id())"/>
+            </xsl:attribute>
+            <xsl:choose>
+
+
+                <xsl:when test="$type = 'concept'">
+                    <fo:block>
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Chapter with number'"/>
+                            <xsl:with-param name="theParameters">
+                                <number>
+                                    <xsl:variable name="id" select="@id"/>
+                                    <xsl:variable name="concepts">
+                                        <xsl:copy-of
+                                            select="$map//*[contains(@class, 'concept/concept')]"/>
+                                    </xsl:variable>
+
+
+                                    <xsl:variable name="parentID" select="parent::node()/@id"/>
+
+                                    <xsl:variable name="conceptNumber">
+                                        <xsl:for-each
+                                            select="//*[@id = $id]/parent::node()/child::node()[self::concept or self::topic]">
+                                            <xsl:if test=" self::node()[@id = $id]">
+                                                <xsl:value-of select="position()"/>
+                                            </xsl:if>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+
+                                    <xsl:variable name="chapterNumber">
+                                        <xsl:for-each
+                                            select="//*[@id = $id]/parent::node()/parent::node()/child::node()[self::concept]">
+                                            <xsl:if test="@id = $parentID">
+                                                <xsl:value-of select="position()"/>
+                                            </xsl:if>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+
+                                    <fo:block font-size="12pt" space-after="5mm" space-before="5mm" keep-with-next.within-column="always">
+                                        <fo:inline font-family="Arial"
+                                            background-color="{$black}"
+                                            padding="1mm 2mm 1mm 2mm" color="{$white}">
+                                            <xsl:value-of select="$chapterNumber"/>
+                                            <xsl:text>.</xsl:text>
+                                            <xsl:value-of select="$conceptNumber"/>
+                                        </fo:inline>
+                                        <xsl:text> </xsl:text>
+                                        <fo:inline xsl:use-attribute-sets="boldFont">
+                                            <xsl:value-of select="//node()[@id = $id]/title"/>
+                                        </fo:inline>
+                                    </fo:block>
+
+
+                                </number>
+                            </xsl:with-param>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+
+
+                <xsl:when test="$type = 'concept2'">
+                    
+                    <fo:block>
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Chapter with number'"/>
+                            <xsl:with-param name="theParameters">
+                                <number>
+                                    <xsl:variable name="id" select="@id"/>
+                                    <xsl:variable name="concepts">
+                                        <xsl:copy-of
+                                            select="$map//*[contains(@class, 'concept/concept')]"/>
+                                    </xsl:variable>
+                                    
+                                    
+                                    <xsl:variable name="parentID" select="parent::node()/@id"/>
+                                    <xsl:variable name="grandparentID" select="parent::node()/parent::node()/@id"/>
+                                    
+                                    <xsl:variable name="concept2Number">
+                                        <xsl:for-each
+                                            select="//*[@id = $id]/parent::node()/child::node()[self::concept or self::topic]">
+                                            <xsl:if test=" self::node()[@id = $id]">
+                                                <xsl:value-of select="position()"/>
+                                            </xsl:if>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+                                    
+                                    <xsl:variable name="conceptNumber">
+                                        <xsl:for-each
+                                            select="//*[@id = $id]/parent::node()/parent::node()/child::node()[self::concept or self::topic]">
+                                            <xsl:if test=" self::node()[@id = $parentID]">
+                                                <xsl:value-of select="position()"/>
+                                            </xsl:if>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+                                    
+                                    <xsl:variable name="chapterNumber">
+                                        <xsl:for-each
+                                            select="//*[@id = $id]/parent::node()/parent::node()/parent::node()/child::node()[self::concept or self::topic]">
+                                            <xsl:if test="@id = $grandparentID">
+                                                <xsl:value-of select="position()"/>
+                                            </xsl:if>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+                                    
+                                    <fo:block font-size="12pt" space-after="5mm" space-before="5mm" keep-with-next.within-column="always">
+                                        <fo:inline font-family="Arial"
+                                            background-color="{$black}"
+                                            padding="1mm 2mm 1mm 2mm" color="{$white}">
+                                            <xsl:value-of select="$chapterNumber"/>
+                                            <xsl:text>.</xsl:text>
+                                            <xsl:value-of select="$conceptNumber"/>
+                                            <xsl:text>.</xsl:text>
+                                            <xsl:value-of select="$concept2Number"/>
+                                        </fo:inline>
+                                        <xsl:text> </xsl:text>
+                                        <fo:inline xsl:use-attribute-sets="boldFont">
+                                            <xsl:value-of select="//node()[@id = $id]/title"/>
+                                        </fo:inline>
+                                    </fo:block>
+                                    
+                                    
+                                </number>
+                            </xsl:with-param>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+                
+                
+
+                <xsl:when test="$type = 'chapter'">
+
+
+                    <fo:block>
+                        <!--  xsl:use-attribute-sets="__chapter__frontmatter__name__container" -->
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Chapter with number'"/>
+                            <xsl:with-param name="theParameters">
+                                <number>
+                                    <xsl:variable name="id" select="@id"/>
+                                    <xsl:variable name="topicChapters">
+                                        <xsl:copy-of
+                                            select="$map//*[contains(@class, ' bookmap/chapter ')]"/>
+                                    </xsl:variable>
+                                    <xsl:variable name="chapterNumber">
+                                        <xsl:for-each
+                                            select="parent::node()/child::*[contains(@class, ' topic/topic ')]">
+                                            <xsl:if test="@id = $id">
+                                                <xsl:value-of select="position()"/>
+                                            </xsl:if>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+
+                                    <!-- Partnumber nur vor erstem Chapter einfügen 
+                                    <xsl:if test="$chapterNumber = 1">
+                                        <xsl:call-template
+                                            name="insertChapterFirstpageStaticContent">
+                                            <xsl:with-param name="type" select="'part'"/>
+                                        </xsl:call-template>
+                                    </xsl:if>-->
+
+
+                                    <fo:block font-size="13pt" space-after="5mm" space-before="5mm" keep-with-next.within-column="always">
+                                        <fo:inline font-family="Arial"
+                                            background-color="{$black}"
+                                            padding="1mm 2mm 1mm 2mm" color="{$white}">
+                                            <xsl:value-of select="$chapterNumber"/>
+                                        </fo:inline>
+                                        <xsl:text> </xsl:text>
+                                        <fo:inline font-family="SimHei">
+                                            <xsl:value-of
+                                                select="self::node()/title"
+                                            />
+                                        </fo:inline>
+                                    </fo:block>
+                                </number>
+                            </xsl:with-param>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+
+                <xsl:when test="$type = 'appendix'">
+                    <fo:block xsl:use-attribute-sets="__chapter__frontmatter__name__container">
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Appendix with number'"/>
+                            <xsl:with-param name="theParameters">
+                                <number>
+                                    <xsl:variable name="id" select="@id"/>
+                                    <xsl:variable name="topicAppendixes">
+                                        <xsl:copy-of
+                                            select="$map//*[contains(@class, ' bookmap/appendix ')]"
+                                        />
+                                    </xsl:variable>
+                                    <xsl:variable name="appendixNumber">
+                                        <xsl:number format="A"
+                                            value="count($topicAppendixes/*[@id = $id]/preceding-sibling::*) + 1"
+                                        />
+                                    </xsl:variable>
+                                    <fo:block
+                                        xsl:use-attribute-sets="__chapter__frontmatter__number__container">
+                                        <xsl:value-of select="$appendixNumber"/>
+                                    </fo:block>
+                                </number>
+                            </xsl:with-param>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+
+                <xsl:when test="$type = 'part'">
+
+                    <fo:block>
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Part with number'"/>
+                            <xsl:with-param name="theParameters">
+                                <number>
+                                    <xsl:variable name="id" select="@id"/>
+                                    <xsl:variable name="topicParts">
+                                        <xsl:copy-of
+                                            select="$map//*[contains(@class, ' bookmap/part ')]"/>
+                                    </xsl:variable>
+                                    <xsl:variable name="partNumber"><xsl:value-of select="substring(./title,1,2)"/></xsl:variable>
+                                    <fo:block keep-with-next.within-column="always">
+                                        <fo:inline  font-family="Arial" font-size="16pt">
+                                            <xsl:value-of select="$partNumber"/>
+                                            <xsl:text> </xsl:text>
+                                        </fo:inline>
+                                        <fo:inline  font-family="SimHei" font-size="16pt">
+                                            <xsl:value-of select=" substring(substring-after(./title, $partNumber),2 )"/>
+                                        </fo:inline>
+                                        </fo:block>
+                                </number>
+                            </xsl:with-param>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+
+
+                <xsl:when test="$type = 'preface'">
+                    <fo:block xsl:use-attribute-sets="__chapter__frontmatter__name__container">
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Preface title'"/>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+                <xsl:when test="$type = 'notices'">
+                    <fo:block xsl:use-attribute-sets="__chapter__frontmatter__name__container">
+                        <xsl:call-template name="insertVariable">
+                            <xsl:with-param name="theVariableID" select="'Notices title'"/>
+                        </xsl:call-template>
+                    </fo:block>
+                </xsl:when>
+            </xsl:choose>
+        </fo:block>
+    </xsl:template>
+
+
+
+
+    <xsl:template match="p">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SIMSUN" id="{@id}" line-height="16pt" vertical-align="text-top">
+            <xsl:apply-templates/>
+        </fo:block>
+    </xsl:template>
+     <xsl:template match="p/text()">
+     
+        <xsl:value-of select="."/>
+
+    </xsl:template>
+    
+ 
+     <xsl:template match="p[child::b]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SimHei" space-before="2mm" space-after="2mm" id="{@id}" line-height="16pt" vertical-align="text-top">
+            <xsl:value-of select="."/>
+        </fo:block>
+    </xsl:template>
+    
+    
+    
+    <xsl:template match="p[ancestor::ol[@outputclass=120]]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SIMSUN" space-before="2mm" space-after="2mm" id="{@id}" line-height="16pt" vertical-align="text-top">
+            <xsl:value-of select="."/>
+        </fo:block>
+    </xsl:template>
+
+   <xsl:template match="p[ancestor::fig[@outputclass=120] and child::b]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SimHei" space-before="2mm" space-after="2mm" id="{@id}" line-height="16pt" vertical-align="text-top">
+            <xsl:value-of select="."/>
+        </fo:block>
+    </xsl:template>
+
+    <xsl:template match="p[ancestor::fig[@outputclass='120a'] and child::b]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SimHei" space-before="2mm" space-after="2mm" id="{@id}" line-height="16pt" vertical-align="text-top">
+            <xsl:value-of select="."/>
+        </fo:block>
+    </xsl:template>
+    
+     <xsl:template match="p[ancestor::fig[@outputclass='120a']]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SIMSUN" space-before="2mm" space-after="2mm" id="{@id}" line-height="16pt" vertical-align="text-top">
+            <xsl:value-of select="."/>
+        </fo:block>
+    </xsl:template>
+    
+
+    
+    <xsl:template match="p[parent::note]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SIMSUN" space-before="1mm" space-after="1mm" id="{@id}">
+            <xsl:value-of select="."/>
+        </fo:block>
+    </xsl:template>
+    <xsl:template match="p[child::table]">
+        <fo:block language="zh-CN" country="zh-CN" font-family="SIMSUN" space-before="1mm" space-after="1mm" id="{@id}">
+            <xsl:apply-templates/>
+        </fo:block>
+    </xsl:template>
+    
+
+
+    <xsl:template match="cite">
+            <fo:inline xsl:use-attribute-sets="xref" id="{@id}">
+                     <xsl:text>=></xsl:text><xsl:value-of select="."/>
+        </fo:inline>
+    </xsl:template>
+
+   <!-- <xsl:template match="fig[@outputclass = 100]">
+        <fo:block text-align="center" space-before="5mm" space-after="2.5mm" id="{@id}" >
+            <xsl:if test="./image">
+            <fo:external-graphic border="solid 0.5pt {$black}" scaling="uniform" 
+                src="url({$artworkPath}{./image/@href})"/>
+              </xsl:if>
+      </fo:block>
+<xsl:if test="child::ol">
+        <fo:table xsl:use-attribute-sets="standardTable" space-after="5mm">
+            <fo:table-body>
+                <xsl:apply-templates select="ol[parent::fig[@outputclass=100]]"/>
+            </fo:table-body>
+        </fo:table>
+</xsl:if>
+    </xsl:template>-->
+    
+    
+<xsl:template match="fig[@outputclass = 100]">
+        <fo:block text-align="center" space-before="5mm" space-after="2.5mm" id="{@id}" keep-with-next.within-page="always">
+            <xsl:if test="./image">
+           <xsl:apply-templates select="image"/>
+              </xsl:if>
+      </fo:block>
+    </xsl:template>    
+    
+
+    <!-- 
+	<xsl:template match="ol[contains(@outputclass, '100')]">
+      <fo:block tll="le">
+     <fo:table>
+   
+        <xsl:apply-templates />  
+       
+    </fo:table>
+    </fo:block>
+    </xsl:template> 
+	-->
+<!-- Delete by liaolingling    -->
+
+
+<!--  this xsl path is wrong, it doesn't perform at all    -->
+    <xsl:template match="li[parent::ol[@outputclass=100]]">
+           <xsl:choose>
+            <xsl:when test="(position() mod 2 != 0) and not(position() = last())">
+            <xsl:text disable-output-escaping="yes">&lt;fo:table-row &gt;</xsl:text>
+                            <xsl:call-template name="fig100InsertTableCell"/>
+            </xsl:when>
+            
+              <xsl:when test="(position() = 1) and (position() = last())">
+                <fo:table-row>
+                    <xsl:call-template name="fig100InsertTableCell"/>
+                </fo:table-row>
+            </xsl:when>
+            
+            <xsl:when test="(position() mod 2 != 0) and position() != 1 and (position() = last())">
+                <fo:table-row>
+                    <xsl:call-template name="fig100InsertTableCell"/>
+                    <xsl:call-template name="fig100InsertTableCell"><xsl:with-param name="emptyCell" select="true()"/></xsl:call-template>
+                </fo:table-row>
+            </xsl:when>
+            
+           <xsl:otherwise>
+               <xsl:call-template name="fig100InsertTableCell"/>
+                <xsl:text disable-output-escaping="yes">&lt;/fo:table-row&gt;</xsl:text>
+            </xsl:otherwise>
+        </xsl:choose>
+ 
+    
+    </xsl:template>
+
+<!-- Modify by Germany on 27th July to solve the line size problem. -->
+<xsl:template name="fig100InsertTableCell">
+        <xsl:param name="emptyCell"/>
+        <fo:table-cell liao="2" border-collapse="collapse" border="solid 0.5pt {$black}" >
+
+            <xsl:choose>
+                <xsl:when test="$emptyCell = true()">
+                    <xsl:if test="ul">
+                        <fo:table table-layout="fixed" width="100%">
+                            <fo:table-body>
+                                <fo:table-row>
+                                    <fo:table-cell border-bottom="solid {$black} 0.5pt">
+                                        <fo:block line-height="12pt"
+                                            xsl:use-attribute-sets="baseFont">
+
+                                            <fo:block-container height="12pt" width="10pt"/>
+                                            <fo:inline padding-start="1mm" line-height="10mm"
+                                                white-space-treatment="preserve">
+                                                <xsl:text> </xsl:text>
+                                            </fo:inline>
+
+                                        </fo:block>
+                                    </fo:table-cell>
+                                </fo:table-row>
+                            </fo:table-body>
+                        </fo:table>
+                    </xsl:if>
+                </xsl:when>
+                <xsl:otherwise>
+                    <fo:table table-layout="fixed" width="100%">
+                        <fo:table-body>
+                            <fo:table-row>
+                                <fo:table-cell>
+                                    <xsl:if
+                                        test="(position() mod 2 != 1 and (descendant::ul or preceding-sibling::li[1]/ul)) or (position() mod 2 = 1 and (descendant::ul or following-sibling::li[1]/ul))">
+                                        <xsl:attribute name="border-bottom">
+                                            <xsl:text>solid </xsl:text>
+                                            <xsl:value-of select="$black"/>
+                                            <xsl:text> 0.5pt</xsl:text>
+                                        </xsl:attribute>
+                                    </xsl:if>
+                                    <fo:block line-height="12pt" xsl:use-attribute-sets="baseFont">
+                                        <fo:inline padding-start="1mm">
+                                            <xsl:value-of select="position()"/>
+                                            <xsl:text> </xsl:text>
+                                            <xsl:value-of select="./p"/>
+                                        </fo:inline>
+                                    </fo:block>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                        </fo:table-body>
+                    </fo:table>
+
+                    <xsl:if
+                        test="(position() mod 2 != 1 and (descendant::ul or preceding-sibling::li[1]/ul)) or (position() mod 2 = 1 and (descendant::ul or following-sibling::li[1]/ul))">
+                        <fo:block xsl:use-attribute-sets="baseFont">
+                            <fo:list-block xsl:use-attribute-sets="ol" id="{@id}">
+                                <fo:list-item xsl:use-attribute-sets="ol.li">
+                                    <fo:list-item-label xsl:use-attribute-sets="ol.li__label"> </fo:list-item-label>
+                                    <fo:list-item-body xsl:use-attribute-sets="ol.li__body">
+                                        <xsl:apply-templates select="ul"/>
+                                    </fo:list-item-body>
+                                </fo:list-item>
+                            </fo:list-block>
+                        </fo:block>
+                    </xsl:if>
+                </xsl:otherwise>
+            </xsl:choose>
+
+        </fo:table-cell>
+    </xsl:template>
+   <xsl:template match="ul[ancestor::ul[@outputclass=100]]">
+       <xsl:apply-templates/>
+   </xsl:template>
+
+
+  <xsl:template match=" li[parent::u and ancestoe::ol[@outputclass=100]]">
+   <fo:list-block xsl:use-attribute-sets="ol" id="{@id}" liao="">
+                                <fo:list-item xsl:use-attribute-sets="ol.li">
+                                    <fo:list-item-label xsl:use-attribute-sets="ol.li__label"> </fo:list-item-label>
+                                    <fo:list-item-body xsl:use-attribute-sets="ol.li__body">
+                                        <xsl:apply-templates select="ul"/>
+                                    </fo:list-item-body>
+                                </fo:list-item>
+                            </fo:list-block>
+
+  </xsl:template>
+
+<!-- add by liaolingling  -->
+    <xsl:template match="fig[contains(@outputclass, '120')]">
+        <fo:table xsl:use-attribute-sets="standardTableNoBorder" space-before="5mm"
+            space-after="5mm" id="{@id}">
+	    
+
+            <fo:table-body>
+                <fo:table-row>
+                    <fo:table-cell empty-cells="show">
+                        <fo:block>
+                            <xsl:if test="./image">
+                            <xsl:apply-templates select="image"/>
+                             </xsl:if>
+                        </fo:block>
+                    </fo:table-cell>
+                    <fo:table-cell>
+                        <fo:block xsl:use-attribute-sets="baseFont">
+                            <xsl:value-of select="title"/>
+                        </fo:block>
+                        <fo:block xsl:use-attribute-sets="baseFont">
+                            <xsl:apply-templates select="*[not(self::image)]"/>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+            </fo:table-body>
+        </fo:table>
+    </xsl:template>
+
+
+  <xsl:template match="fig[contains(@outputclass, '120a')]">
+        <fo:table xsl:use-attribute-sets="standardTableNoBorder" space-before="5mm"
+            space-after="5mm" id="{@id}">
+	    
+            <fo:table-body>
+                <fo:table-row>
+                    <fo:table-cell empty-cells="show">
+                        <fo:block>
+                            <xsl:if test="./image">
+                             <fo:external-graphic border="solid 0.5pt {$black}" scaling="uniform" content-width="60mm" 
+                                  src="url({$artworkPath}{./image/@href})"/>
+                             </xsl:if>
+                        </fo:block>
+                    </fo:table-cell>
+                    <fo:table-cell>
+                        <fo:block xsl:use-attribute-sets="baseFont">
+                            <xsl:value-of select="title"/>
+                        </fo:block>
+                        <fo:block xsl:use-attribute-sets="baseFont">
+                            <xsl:apply-templates select="*[not(self::image)]"/>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+            </fo:table-body>
+        </fo:table>
+    </xsl:template>
+
+
+
+    <xsl:template match="fig[@outputclass = 140]">
+        <fo:table xsl:use-attribute-sets="standardTable" space-after="5mm" space-before="5mm"
+            id="{@id}">
+            <fo:table-body>
+                <xsl:apply-templates select="ul[parent::fig[@outputclass = 140]]"/>
+            </fo:table-body>
+        </fo:table>
+    </xsl:template>
+
+    <xsl:template match="ul[parent::fig[@outputclass = 140]]">
+        <xsl:apply-templates select="li[parent::ul/parent::fig[@outputclass = 140]]"/>
+    </xsl:template>
+
+    <xsl:template match="li[parent::ul/parent::fig[@outputclass = 140]]">
+        <xsl:choose>
+            <xsl:when test="(position() mod 2 != 0) and not(position() = last())">
+                <xsl:text disable-output-escaping="yes">&lt;fo:table-row &gt;</xsl:text>
+                <fo:table-cell id="{@id}">
+                    <fo:block>
+                        <xsl:apply-templates select="fig[ancestor::fig[@outputclass = 140]]"/>
+                    </fo:block>
+                </fo:table-cell>
+            </xsl:when>
+
+            <xsl:when test="(position() mod 2 != 0) and (position() = last())">
+                <fo:table-row>
+                    <fo:table-cell xsl:use-attribute-sets="tableCellBorder">
+                        <fo:block padding-after="2mm" padding-before="2mm" text-align="center">
+                                <fo:external-graphic content-width="50mm" content-height="38mm"
+                                    src="url({$artworkPath}{descendant::image/@href})" scaling="uniform"/>
+                            </fo:block>
+                    </fo:table-cell>
+                    
+                   <fo:table-cell xsl:use-attribute-sets="tableCellBorder">
+                                        <fo:block><xsl:text> </xsl:text></fo:block>
+                          </fo:table-cell>
+                          
+                </fo:table-row>
+                <fo:table-row>
+                    <fo:table-cell xsl:use-attribute-sets="tableCellBorder">
+                        <fo:block text-align="center">
+                            <xsl:apply-templates select="descendant::p"/>
+                        </fo:block><fo:block><xsl:text> </xsl:text></fo:block>
+                    </fo:table-cell>
+                        <fo:table-cell xsl:use-attribute-sets="tableCellBorder">
+                        <fo:block>
+                            <fo:block><xsl:text> </xsl:text></fo:block>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+            </xsl:when>
+
+            <xsl:otherwise>
+                <fo:table-cell>
+                    <fo:block>
+                        <xsl:apply-templates select="fig[ancestor::fig[@outputclass = 140]]"/>
+                    </fo:block>
+                </fo:table-cell>
+                <xsl:text disable-output-escaping="yes">&lt;/fo:table-row&gt;</xsl:text>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="fig[ancestor::fig[@outputclass = 140]]">
+        <xsl:variable name="pathGFX" select="translate(concat($artworkPath,./image/@href),'\','/')"/>
+        <xsl:variable name="checkGFX" select="file:exists(file:new($pathGFX))"/>
+        
+        <!--<xsl:if test="@href!=''">    -->
+        <xsl:if test="$checkGFX = 'true'">
+          <fo:table xsl:use-attribute-sets="standardTableNoBorder" text-align="center" id="{@id}">
+            <fo:table-body>
+                <fo:table-row keep-with-next="always">
+                    <fo:table-cell xsl:use-attribute-sets="tableCellBorder">
+                        <fo:block padding-after="2mm" padding-before="2mm">
+                            <xsl:apply-templates select="image"/>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+                <fo:table-row>
+                    <fo:table-cell xsl:use-attribute-sets="tableCellBorder">
+                        <fo:block>
+                            <xsl:apply-templates select="p"/>
+                        </fo:block>
+                    </fo:table-cell>
+                </fo:table-row>
+            </fo:table-body>
+        </fo:table>
+</xsl:if>
+    </xsl:template>
+
+    <xsl:template match="image">
+                <xsl:variable name="pathGFX" select="translate(concat($artworkPath,@href),'\','/')"/>
+        <xsl:variable name="checkGFX" select="file:exists(file:new($pathGFX))"/>
+       
+        <!--<xsl:if test="@href!=''">    -->
+        <xsl:if test="$checkGFX = 'true'">
+        <fo:external-graphic border="0.5pt solid {$black}"
+            src="url({$pathGFX})" id="{@id}" scaling="uniform">
+            <xsl:choose>
+                <xsl:when test="@height and @height!=''"><xsl:attribute name="content-height"><xsl:value-of select="@height"/></xsl:attribute></xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <xsl:when test="ancestor::fig[@outputclass=100]"><xsl:attribute name="content-height">132mm</xsl:attribute></xsl:when>
+                         <xsl:when test="ancestor::fig[@outputclass='120a']"><xsl:attribute name="content-height">70mm</xsl:attribute></xsl:when>
+                        <xsl:when test="ancestor::fig[@outputclass=120]"><xsl:attribute name="content-height">50mm</xsl:attribute></xsl:when>
+                        <xsl:when test="ancestor::fig[@outputclass=140]"><xsl:attribute name="content-height">38mm</xsl:attribute></xsl:when>
+                        <xsl:otherwise><xsl:attribute name="height">50mm</xsl:attribute></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose>
+            <xsl:choose>
+                <xsl:when test="@width and @width!=''"><xsl:attribute name="content-width"><xsl:value-of select="@width"/></xsl:attribute></xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <xsl:when test="ancestor::fig[@outputclass=100]"><xsl:attribute name="content-width">145mm</xsl:attribute></xsl:when>
+                        <xsl:when test="ancestor::fig[@outputclass=120]"><xsl:attribute name="content-width">60mm</xsl:attribute></xsl:when>
+                          <xsl:when test="ancestor::fig[@outputclass='120a']"><xsl:attribute name="content-width">60mm</xsl:attribute></xsl:when>
+                        <xsl:when test="ancestor::fig[@outputclass=140]"><xsl:attribute name="content-width">50mm</xsl:attribute></xsl:when>
+                         
+                        <xsl:otherwise><xsl:attribute name="width">60mm</xsl:attribute></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose>           
+        </fo:external-graphic></xsl:if>
+       </xsl:template>
+
+
+    <xsl:template match="note">
+        <fo:block space-after="3mm" space-before="3mm" id="{@id}" keep-together.within-page="always">
+            <fo:table xsl:use-attribute-sets="standardTable">
+                <fo:table-header>
+                    <xsl:choose>
+                        <xsl:when test="@type='caution' ">
+                            <xsl:attribute name="background-color">
+                                <xsl:value-of select="$cautionHeadColor"/>
+                            </xsl:attribute>
+                        </xsl:when>
+
+                        <xsl:when test="@type='warning' ">
+                            <xsl:attribute name="background-color">
+                                <xsl:value-of select="$warningHeadColor"/>
+                            </xsl:attribute>
+                        </xsl:when>
+                        <xsl:when test="@type='note' ">
+                            <xsl:attribute name="background-color">
+                                <xsl:value-of select="$noteHeadColor"/>
+                            </xsl:attribute>
+                        </xsl:when>
+                    </xsl:choose>
+
+                    <fo:table-row height="4.4mm">
+                        <fo:table-cell display-align="center" border-bottom="0.2pt solid {$black}">
+                            <fo:block font-size="10pt">
+			    
+                                <xsl:choose>
+                                    <xsl:when test="@type= 'caution' ">
+                                        <xsl:attribute name="color">
+                                            <xsl:value-of select="$black"/>
+                                        </xsl:attribute>
+                                    </xsl:when>
+                                    <xsl:when test="@type= 'warning' or @type= 'danger' ">
+                                        <xsl:attribute name="color">
+                                            <xsl:value-of select="$white"/>
+                                        </xsl:attribute>
+                                    </xsl:when>
+                                </xsl:choose>
+                                <!--<fo:inline padding-start="1mm">
+                                    <fo:external-graphic vertical-align="bottom" height="4.4mm"
+                                        content-height="4.0mm" src="url({$artworkPath}warning.pdf)"
+                                    />
+                                </fo:inline>
+                                <fo:inline padding-start="1mm" alignment-adjust="ideographic" xsl:use-attribute-sets="baseFont">
+                                    <xsl:value-of select="./p"/>
+                                </fo:inline>-->
+                          
+                           <xsl:choose>
+                                      <xsl:when test="@type= 'warning' ">
+                                      <fo:inline padding-start="1mm"><fo:external-graphic vertical-align="bottom" height="4.4mm"
+                                    content-height="4.0mm"
+                                    src="url({$artworkPath}icons/warning.pdf)"/></fo:inline>
+                                      <fo:inline padding-start="1mm" alignment-adjust="ideographic" font-family="SimHei" font-weight="bold"><xsl:text>警告</xsl:text></fo:inline>
+                                      </xsl:when>
+                                      <xsl:when test="@type= 'caution' ">
+                                      <fo:inline padding-start="1mm"><fo:external-graphic vertical-align="bottom" height="4.4mm"
+                                    content-height="4.0mm"
+                                    src="url({$artworkPath}icons/caution.pdf)"/></fo:inline>
+                                      <fo:inline padding-start="1mm" alignment-adjust="ideographic" font-family="SimHei" font-weight="bold"><xsl:text>注意</xsl:text></fo:inline>
+                                      </xsl:when>
+                                      <xsl:when test="@type= 'danger' ">
+                                      <fo:inline padding-start="1mm"><fo:external-graphic vertical-align="bottom" height="4.4mm"
+                                    content-height="4.0mm"
+                                    src="url({$artworkPath}icons/danger.pdf)"/></fo:inline>
+                                      <fo:inline padding-start="1mm" alignment-adjust="ideographic" font-family="SimHei" font-weight="bold"><xsl:text>危险</xsl:text></fo:inline>
+                                      </xsl:when>
+                                      <xsl:otherwise>
+                                      <fo:inline padding-start="1mm"><fo:external-graphic vertical-align="bottom" height="4.4mm"
+                                    content-height="4.0mm"
+                                    src="url({$artworkPath}icons/note.pdf)"/></fo:inline>
+                                      <fo:inline padding-start="1mm" alignment-adjust="ideographic" font-family="SimHei" font-weight="bold"><xsl:text>提示</xsl:text></fo:inline>
+                                      </xsl:otherwise>
+                                    </xsl:choose>
+                            </fo:block>
+                        </fo:table-cell>
+                    </fo:table-row>
+                </fo:table-header>
+
+                <fo:table-body>
+                    <fo:table-row>
+                        <fo:table-cell>
+                            <fo:block start-indent="3mm" end-indent="3mm">
+                                <xsl:apply-templates/>   
+                            </fo:block>
+                        </fo:table-cell>
+                    </fo:table-row>
+
+                </fo:table-body>
+            </fo:table>
+        </fo:block>
+    </xsl:template>
+
+<xsl:template match="note/text()">
+      <fo:block padding-top="1mm" padding-bottom="1mm" id="{@id}">
+        <xsl:value-of select="."/>
+      </fo:block>
+    </xsl:template>
+
+
+    <!-- List -->
+    
+<!--
+    <xsl:template match="ol[not(parent::node() = li)and not(ancestor::fig[@outputclass=100])] ">
+        <fo:list-block id="{@id}">
+            <xsl:apply-templates select="li"/>
+        </fo:list-block>
+    </xsl:template>
+
+    <xsl:template match="li[parent::ol and not(ancestor::fig[@outputclass=100])]">
+        <fo:list-item id="{@id}">
+            <fo:list-item-label start-indent="1mm" end-indent="1mm">
+                <fo:block font-family="Arial">
+                    <xsl:value-of select="position()"/>
+                </fo:block>
+            </fo:list-item-label>
+            <fo:list-item-body start-indent="5mm">
+                <fo:block xsl:use-attribute-sets="baseFont">- <xsl:apply-templates/></fo:block>
+            </fo:list-item-body>
+        </fo:list-item>
+    </xsl:template>
+
+
+    <xsl:template match="ul[not(parent::node() = li) and not(ancestor::fig[@outputclass= 140])]">
+        <fo:list-block id="{@id}" xsl:use-attribute-sets="baseFont">
+            <xsl:apply-templates/>
+        </fo:list-block>
+    </xsl:template> -->
+    <!--Delete by liaolingling   begin-->
+
+    <xsl:template match="*[contains(@class, ' topic/ol ') and not (parent::fig[@outputclass=100])]">
+        <fo:list-block space-before="2mm" space-after="2mm" id="{@id}">
+            <xsl:apply-templates select="li"/>
+        </fo:list-block>
+    </xsl:template>
+    
+<xsl:template match="*[contains(@class, ' topic/ol ')]/*[contains(@class, ' topic/li ') and not(parent::ol/parent::fig[@outputclass=100 or @outputclass=140])]">
+        <fo:list-item>
+            <fo:list-item-label start-indent="1mm" end-indent="1mm">
+                <fo:block font-family="Arial">
+                    <xsl:value-of select="position()"/>
+                </fo:block>
+          </fo:list-item-label>
+            <fo:list-item-body >
+                <fo:block  start-indent="5mm" space-before="1mm" space-after="1mm" font-family="SIMSUN"><xsl:apply-templates/></fo:block>
+            </fo:list-item-body>
+        </fo:list-item>
+    </xsl:template>    
+    
+    
+    
+    
+    
+    
+ <xsl:template match="*[contains(@class, ' topic/ul ') and not(parent::fig/@outputclass) and not(ancestor::ol/@outputclass)]">
+        <fo:list-block xsl:use-attribute-sets="ul" id="{@id}">
+           <xsl:apply-templates select="li"/>
+    </fo:list-block>
+</xsl:template>
+
+
+     <xsl:template match="*[contains(@class, ' topic/ul ')]/*[contains(@class, ' topic/li ') and not(parent::ul/parent::fig[@outputclass=100 or @outputclass=140])]">
+        <fo:list-item xsl:use-attribute-sets="ul.li">
+            <fo:list-item-label xsl:use-attribute-sets="ul.li__label">
+                <fo:block xsl:use-attribute-sets="ul.li__label__content">
+                    <fo:inline id="@id" xsl:use-attribute-sets="baseFont">
+            <xsl:choose>
+                <xsl:when test="parent::*[@outputclass='cmd']">-</xsl:when>
+                <xsl:when test="parent::*[not(@outputclass) or @outputclass='']">·</xsl:when>
+                <xsl:when test="parent::*[@outputclass='blank']"><xsl:text> </xsl:text></xsl:when>
+            </xsl:choose>
+                    </fo:inline></fo:block>
+        </fo:list-item-label>
+            <fo:list-item-body xsl:use-attribute-sets="ul.li__body"><fo:block xsl:use-attribute-sets="baseFont"><xsl:apply-templates/></fo:block></fo:list-item-body>
+    </fo:list-item>
+</xsl:template>
+
+    <!--Delete by liaolingling  end-->
+
+
+    
+    
+    
+    <xsl:template match="li/text()">
+        <xsl:value-of select="."/>
+    </xsl:template>
+
+
+<!--
+        
+        
+        
+    <xsl:template
+        match="li[not(parent::ul/parent::li) and not(parent::ol)  and not(ancestor::fig[@outputclass= 140])]">
+        <fo:list-item id="{@id}">
+            <xsl:choose>
+                <xsl:when test=" child::text()|p">
+                    <fo:list-item-label start-indent="3mm" end-indent="1mm">
+                        <fo:block>-</fo:block>
+                    </fo:list-item-label>
+                    <fo:list-item-body start-indent="7.5mm">
+                        <fo:block>
+                            <xsl:apply-templates/>
+                        </fo:block>
+                    </fo:list-item-body>
+                </xsl:when>
+                <xsl:when test="child::ul">
+                    <fo:list-item-label>
+                        <fo:block>
+                            <xsl:text> </xsl:text>
+                        </fo:block>
+                    </fo:list-item-label>
+                    <fo:list-item-body>
+                        <fo:list-block>
+                            <xsl:apply-templates select="ul[parent::li and not( ancestor::ol)]"/>
+                        </fo:list-block>
+                    </fo:list-item-body>
+                </xsl:when>
+            </xsl:choose>
+        </fo:list-item>
+    </xsl:template>
+
+    
+
+    <xsl:template match="ul[parent::li and not( ancestor::ol)]">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="li[parent::ul/parent::li]">
+        <fo:list-item id="{@id}">
+            <fo:list-item-label start-indent="7.5mm" end-indent="1mm">
+                <fo:block xsl:use-attribute-sets="numerationFont">•</fo:block>
+            </fo:list-item-label>
+            <fo:list-item-body start-indent="15mm">
+                <fo:block xsl:use-attribute-sets="baseFont">
+                    <xsl:apply-templates/>
+                </fo:block>
+            </fo:list-item-body>
+        </fo:list-item>
+    </xsl:template>
+
+
+
+    <xsl:template match="li/text()">
+        <xsl:value-of select="."/>
+    </xsl:template> -->
+
+
+
+    <!-- Table -->
+
+    <xsl:template match="table/tgroup">
+        <fo:table xsl:use-attribute-sets="standardTable" 
+            id="{@id}" table-omit-header-at-break="false" border-spacing="3pt">
+            <xsl:apply-templates select="colspec"/>
+            <xsl:apply-templates select="thead"/>
+            <xsl:apply-templates select="tbody"/>
+        </fo:table>
+    </xsl:template>
+
+    <xsl:template match="tbody">
+        <fo:table-body id="{@id}">
+            <xsl:apply-templates select="row"/>
+        </fo:table-body>
+    </xsl:template>
+
+    <xsl:template match="colspec">
+        <fo:table-column/>
+    </xsl:template>
+
+    <xsl:template match="thead">
+        <fo:table-header id="{@id}">
+            <xsl:apply-templates select="row"/>
+        </fo:table-header>
+    </xsl:template>
+
+    <xsl:template match="row">
+    
+        <fo:table-row id="{@id}" keep-together.within-page="always">
+            <xsl:if test="@importance = 'high'">
+                <xsl:attribute name="background-color">
+                    <xsl:value-of select="$gray"/>
+                </xsl:attribute>
+              
+                </xsl:if>
+            
+            <xsl:apply-templates select="entry"/>
+        </fo:table-row>
+    </xsl:template>
+
+    <xsl:template match="entry">
+    <xsl:variable name="center">center</xsl:variable>
+        <fo:table-cell border="solid 0.5pt {$black}" id="{@id}" padding="1mm 1mm 1mm 1mm" display-align="center">
+           <xsl:call-template name="applySpansAttrs"/>
+           <xsl:call-template name="applyAlignAttrs"/>  
+           <xsl:if test="parent::*[@importance='high']"> 
+                 <xsl:attribute name="text-align"><xsl:value-of select="$center"/></xsl:attribute>
+            </xsl:if>
+           <!-- <xsl:if test="@morerows">
+                <xsl:attribute name="number-rows-spanned">
+                    <xsl:value-of select="@morerows + 1"/>
+                </xsl:attribute>
+            </xsl:if>-->
+
+            <fo:block xsl:use-attribute-sets="baseFont">
+                <xsl:apply-templates/>
+            </fo:block>
+        </fo:table-cell>
+    </xsl:template>
+    <!-- add by liaolingling for table begin  -->
+    
+    <xsl:template match="entry[parent::row/parent::thead]">
+       <fo:table-cell border="solid 0.5pt {$black}" padding="1mm 1mm 1mm 1mm" display-align="center" text-align="center">
+           <xsl:call-template name="applySpansAttrs"/>
+           <xsl:call-template name="applyAlignAttrs"/>          
+            <fo:block text-align="center" font-family="SimHei">
+                  <xsl:apply-templates/>   
+            </fo:block>
+          </fo:table-cell>
+    </xsl:template>
+    
+  <xsl:template match="entry/text()">
+        <xsl:value-of select="."/>
+    </xsl:template>
+     
+     
+    <!-- add by liaolingling    -->
+  <xsl:template name="applySpansAttrs">
+        <xsl:if test="(@morerows) and (number(@morerows) &gt; 0)">
+            <xsl:attribute name="number-rows-spanned">
+                <xsl:value-of select="number(@morerows)+1"/>
+            </xsl:attribute>
+        </xsl:if>
+
+        <xsl:if test="(@nameend) and (@namest)">
+            <xsl:variable name="startNum">
+                <xsl:call-template name="getEntryNumber">
+                    <xsl:with-param name="colname" select="@namest"/>
+                    <xsl:with-param name="optionalName" select="@colname"/>
+                </xsl:call-template>
+            </xsl:variable>
+
+            <xsl:variable name="endNum">
+                <xsl:call-template name="getEntryNumber">
+                    <xsl:with-param name="colname" select="@nameend"/>
+                </xsl:call-template>
+            </xsl:variable>
+
+            <xsl:if test="($startNum &gt; '-1') and ($endNum &gt; '-1') and ((number($endNum) - number($startNum)) &gt; 0)">
+                <xsl:attribute name="number-columns-spanned">
+                    <xsl:value-of select="(number($endNum) - number($startNum))+1"/>
+                </xsl:attribute>
+            </xsl:if>
+        </xsl:if>
+    </xsl:template>
+     <xsl:template name="applyAlignAttrs">
+        <xsl:variable name="align">
+            <xsl:choose>
+                <xsl:when test="@align">
+                    <xsl:value-of select="@align"/>
+                </xsl:when>
+                <xsl:when test="ancestor::*[contains(@class,' topic/tbody ')][1][@align]">
+                    <xsl:value-of select="ancestor::*[contains(@class,' topic/tbody ')][1]/@align"/>
+                </xsl:when>
+                <xsl:when test="ancestor::*[contains(@class,' topic/thead ')][1][@align]">
+                    <xsl:value-of select="ancestor::*[contains(@class,' topic/tbody ')][1]/@align"/>
+                </xsl:when>
+                <xsl:when test="ancestor::*[contains(@class,' topic/tgroup ')][1][@align]">
+                    <xsl:value-of select="ancestor::*[contains(@class,' topic/tbody ')][1]/@align"/>
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="valign">
+            <xsl:choose>
+                <xsl:when test="@valign">
+                    <xsl:value-of select="@valign"/>
+                </xsl:when>
+                <xsl:when test="parent::*[contains(@class,' topic/row ')][@valign]">
+                    <xsl:value-of select="parent::*[contains(@class,' topic/row ')]/@valign"/>
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="not($align = '')">
+                <xsl:attribute name="text-align">
+                    <xsl:value-of select="$align"/>
+                </xsl:attribute>
+            </xsl:when>
+            <xsl:when test="($align='') and contains(@class, ' topic/colspec ')"/>
+            <xsl:otherwise>
+                <xsl:attribute name="text-align">from-table-column()</xsl:attribute>
+            </xsl:otherwise>
+        </xsl:choose>
+        <xsl:choose>
+            <xsl:when test="$valign='top'">
+                <xsl:attribute name="display-align">
+                    <xsl:value-of select="'before'"/>
+                </xsl:attribute>
+            </xsl:when>
+            <xsl:when test="$valign='middle'">
+                <xsl:attribute name="display-align">
+                    <xsl:value-of select="'center'"/>
+                </xsl:attribute>
+            </xsl:when>
+            <xsl:when test="$valign='bottom'">
+                <xsl:attribute name="display-align">
+                    <xsl:value-of select="'after'"/>
+                </xsl:attribute>
+            </xsl:when>
+        </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template name="getEntryNumber">
+        <xsl:param name="colname"/>
+        <xsl:param name="optionalName" select="''"/>
+
+        <xsl:choose>
+            <xsl:when test="not(string(number($colname))='NaN')">
+                <xsl:value-of select="$colname"/>
+            </xsl:when>
+
+            <xsl:when test="ancestor::*[contains(@class,' topic/tgroup ')][1]/*[contains(@class,' topic/colspec ')][@colname = $colname]">
+                <xsl:for-each select="ancestor::*[contains(@class,' topic/tgroup ')][1]/*[contains(@class,' topic/colspec ')][@colname = $colname]">
+                    <xsl:choose>
+                        <xsl:when test="@colnum">
+                            <xsl:value-of select="@colnum"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="count(preceding-sibling::*[contains(@class,' topic/colspec ')])+1"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </xsl:when>
+
+            <xsl:when test="not($optionalName = '') and ancestor::*[contains(@class,' topic/tgroup ')][1]/*[contains(@class,' topic/colspec ')][@colname = $optionalName]">
+                <xsl:for-each select="ancestor::*[contains(@class,' topic/tgroup ')][1]/*[contains(@class,' topic/colspec ')][@colname = $optionalName]">
+                    <xsl:choose>
+                        <xsl:when test="@colnum">
+                            <xsl:value-of select="@colnum"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="count(preceding-sibling::*[contains(@class,' topic/colspec ')])+1"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </xsl:when>
+
+            <xsl:when test="not(string(number(translate($colname,'+-0123456789.abcdefghijklmnopqrstuvwxyz','0123456789')))='NaN')">
+                <xsl:value-of select="number(translate($colname,'0123456789.abcdefghijklmnopqrstuvwxyz','0123456789'))"/>
+            </xsl:when>
+
+            <xsl:otherwise>
+                <xsl:value-of select="'-1'"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+ <!-- add by liaolingling for table end -->
+    
+    
+    <!-- XREF  -->
+    
+<!-- Backup by liaolingling begin -->
+    <xsl:template match="*[contains(@class,' topic/xref ')]">
+        <fo:inline id="{@id}"/>
+        
+        <xsl:variable name="destination" select="opentopic-func:getDestinationId(@href)"/>
+        <xsl:variable name="element" select="key('key_anchor',$destination)[1]"/>
+        
+        <xsl:variable name="referenceTitle">
+            <xsl:call-template name="insertReferenceTitle">
+                <xsl:with-param name="href" select="@href"/>
+                <xsl:with-param name="titlePrefix" select="''"/>
+                <xsl:with-param name="destination" select="$destination"/>
+                <xsl:with-param name="element" select="$element"/>
+            </xsl:call-template>
+        </xsl:variable>
+        
+
+        
+        
+        
+        
+        <fo:basic-link xsl:use-attribute-sets="xref">
+            <xsl:call-template name="buildBasicLinkDestination">
+                <xsl:with-param name="scope" select="@scope"/>
+                <xsl:with-param name="href" select="@href"/>
+            </xsl:call-template>
+            <!--
+            <xsl:choose>
+                <xsl:when test="not(@scope = 'external') and not($referenceTitle = '')">
+                    <xsl:copy-of select="$referenceTitle"/>
+                </xsl:when>
+                <xsl:when test="not(@scope = 'external')">
+                    <xsl:call-template name="insertPageNumberCitation">
+                        <xsl:with-param name="isTitleEmpty" select="'yes'"/>
+                        <xsl:with-param name="destination" select="$destination"/>
+                        <xsl:with-param name="element" select="$element"/>
+                    </xsl:call-template>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <xsl:when test="*[not(contains(@class,' topic/desc '))] | text()">
+                            <xsl:apply-templates select="*[not(contains(@class,' topic/desc '))] | text()" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="@href"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose> -->
+
+
+
+            <fo:inline>
+            <xsl:text>=></xsl:text>
+                <xsl:choose>
+                    <xsl:when test="@type='concept'"><xsl:value-of select="$xrefConceptStart"/></xsl:when>
+                    <xsl:when test="@type='fig'"><xsl:value-of select="$xreffigStart"/></xsl:when>
+                    <xsl:when test="@type='table'"><xsl:value-of select="$xreftableStart"/></xsl:when>
+                    <xsl:otherwise><xsl:text>见</xsl:text></xsl:otherwise>
+                </xsl:choose>
+                
+                <fo:page-number-citation>
+                    <xsl:attribute name="ref-id"><xsl:value-of select="$destination"/></xsl:attribute>
+                </fo:page-number-citation>
+                   <xsl:choose>
+           <xsl:when test="@type='concept'"><xsl:value-of select="$xrefConceptEnd"/></xsl:when>
+            <xsl:when test="@type='fig'"><xsl:value-of select="$xreffigEnd"/></xsl:when>
+            <xsl:when test="@type='table'"><xsl:value-of select="$xreftableEnd"/></xsl:when>
+            <xsl:otherwise>
+	     <xsl:if test="@type!=''"><xsl:value-of select="$xrefPageEnd"/></xsl:if> 
+	    </xsl:otherwise>
+                   </xsl:choose>
+            </fo:inline>
+            
+            
+                </fo:basic-link>
+
+
+       <xsl:if test="not(@scope = 'external') and not($referenceTitle = '') and not($element[contains(@class, ' topic/fn ')])">
+             <xsl:if test="not(processing-instruction()[name()='ditaot'][.='usertext'])">
+                <xsl:call-template name="insertPageNumberCitation">
+                    <xsl:with-param name="destination" select="$destination"/>
+                    <xsl:with-param name="element" select="$element"/>
+                </xsl:call-template>
+            </xsl:if>
+        </xsl:if>
+      </xsl:template>
+      
+      
+      <!-- TOC -->
+
+    <xsl:template name="createToc">
+        
+    <xsl:if test="//toc">
+        
+            <fo:page-sequence master-reference="toc-sequence" format="i" xsl:use-attribute-sets="__force__page__count">
+                
+                <xsl:call-template name="insertTocStaticContents"/>
+                
+                <fo:flow flow-name="xsl-region-body">
+                    <fo:block>
+                     <fo:block font-size="18pt" font-family="SimHei" text-align="center">目录</fo:block>
+                       <xsl:apply-templates select="bookmap" mode="tocs"/>
+                    </fo:block>
+                </fo:flow>
+            </fo:page-sequence>
+</xsl:if>
+    </xsl:template>
+    
+ 
+   <xsl:template match="toc"/>
+
+    <xsl:template match="bookmap" mode="tocs">
+        <fo:block-container width="100%"><xsl:apply-templates select="topic[parent::bookmap]" mode="tocs"/></fo:block-container>
+    </xsl:template>
+
+    <xsl:template match="topic[parent::bookmap]" mode="tocs">
+    <xsl:comment>toc test</xsl:comment>
+        <fo:block xsl:use-attribute-sets="baseFont" text-align-last="justify" start-indent="0cm" end-indent="2pt" font-size="12pt" space-before="12pt" space-after="24pt">
+            <fo:inline font-family="SimHei"><fo:basic-link internal-destination="{@id}">  <xsl:value-of select="./title"/></fo:basic-link></fo:inline>
+            <fo:leader leader-pattern="dots" />
+            <fo:inline><fo:basic-link internal-destination="{@id}"><fo:page-number-citation ref-id="{@id}"/></fo:basic-link></fo:inline>
+        
+        <xsl:apply-templates select="concept[parent::topic/parent::bookmap]" mode="tocs"/>
+</fo:block>
+    <xsl:comment>toc test end</xsl:comment>
+</xsl:template>
+
+    <xsl:template match="concept[parent::topic/parent::bookmap]" mode="tocs">
+        <xsl:variable name="chapterPosition"><xsl:value-of select="position()"/></xsl:variable>
+    <xsl:comment>toc test</xsl:comment>
+        <fo:block xsl:use-attribute-sets="baseFont" text-align-last="justify" start-indent="1cm" end-indent="2pt" font-size="10pt">
+            <fo:inline font-family="SimHei"><fo:basic-link internal-destination="{@id}"><xsl:value-of select="$chapterPosition"/><xsl:text>        </xsl:text><xsl:value-of select="./title"/></fo:basic-link></fo:inline>
+            <fo:leader leader-pattern="dots"/>
+            <fo:inline><fo:basic-link internal-destination="{@id}"><fo:page-number-citation ref-id="{@id}"/></fo:basic-link></fo:inline>
+        <xsl:apply-templates select="concept[parent::concept/parent::topic/parent::bookmap]" mode="tocs"><xsl:with-param name="chapterPosition" select="$chapterPosition"/></xsl:apply-templates>
+    </fo:block>
+    <xsl:comment>toc test end</xsl:comment>
+</xsl:template>
+
+    <xsl:template match="concept[parent::concept/parent::topic/parent::bookmap]" mode="tocs">
+        <xsl:param name="chapterPosition"/>
+        <xsl:variable name="subChapterPosition"><xsl:value-of select="position()"/></xsl:variable>
+        <xsl:comment>toc test</xsl:comment>
+        <fo:block xsl:use-attribute-sets="baseFont" text-align-last="justify" start-indent="1cm" end-indent="2pt" font-size="10pt">
+            <fo:inline><fo:basic-link internal-destination="{@id}"><xsl:value-of select="$chapterPosition"/>.<xsl:value-of select="$subChapterPosition"/><xsl:text>    </xsl:text><xsl:value-of select="./title"/></fo:basic-link></fo:inline>
+            <fo:leader leader-pattern="dots"/>
+            <fo:inline><fo:basic-link internal-destination="{@id}"><fo:page-number-citation ref-id="{@id}"/></fo:basic-link></fo:inline>
+ <!-- disabled the fourth level titile  -->            
+            
+<!--            <xsl:apply-templates select="concept[parent::concept/parent::concept/parent::topic/parent::bookmap]" mode="tocs">
+                <xsl:with-param name="chapterPosition" select="$chapterPosition"/>
+                <xsl:with-param name="subChapterPosition" select="$subChapterPosition"/>
+            </xsl:apply-templates>
+-->            
+            
+         </fo:block>
+        <xsl:comment>toc test end</xsl:comment>
+    </xsl:template>
+    <!-- disabled the fourth level titile  -->
+ <!--   
+    <xsl:template match="concept[parent::concept/parent::concept/parent::topic/parent::bookmap]"  mode="tocs">
+        <xsl:param name="chapterPosition"/>
+        <xsl:param name="subChapterPosition"/>
+        
+        <xsl:comment>toc test</xsl:comment>
+        
+        <fo:block xsl:use-attribute-sets="baseFont" text-align-last="justify" start-indent="1cm" end-indent="2pt" font-size="10pt">
+            <fo:inline><fo:basic-link internal-destination="{@id}"><xsl:value-of select="$chapterPosition"/>.<xsl:value-of select="$subChapterPosition"/>.<xsl:value-of select="position()"/>.<xsl:value-of select="./title"/></fo:basic-link></fo:inline>
+            <fo:leader leader-pattern="dots"/>
+                <fo:inline><fo:basic-link internal-destination="{@id}"><fo:page-number-citation ref-id="{@id}"/></fo:basic-link></fo:inline>
+        </fo:block>
+        <xsl:comment>toc test end</xsl:comment>
+    </xsl:template>
+  -->  
+    
+       <xsl:template name="insertTocOddHeader">
+        <fo:static-content flow-name="odd-body-header">
+            <fo:block-container position="absolute" bottom="1mm" left="0mm" height="14mm" width="170mm"
+                display-align="after" xsl:use-attribute-sets="boldFont" text-align="end">
+                <fo:block font-size="9pt" >广汽传祺轿车 2010</fo:block>
+                <fo:block font-size="9pt">
+                    <fo:inline><xsl:value-of select="//booktitlealt"/></fo:inline>
+                    <fo:inline> 10.2010</fo:inline>
+                </fo:block>
+            </fo:block-container>
+            
+              <fo:block-container top="4mm" left="0mm"
+                height="10mm" width="16mm" display-align="center" position="absolute" text-align="center">
+                <xsl:comment>here is a text logo before, delete by the requirement of custom.</xsl:comment>
+                <fo:block font-size="9pt"></fo:block>
+                </fo:block-container>
+            </fo:static-content>
+    </xsl:template>
+    
+    <xsl:template name="insertTocEvenHeader">
+        <fo:static-content flow-name="even-body-header">
+                <fo:block-container position="absolute" bottom="1mm" left="0mm" height="14mm" width="150mm"
+                display-align="after" xsl:use-attribute-sets="boldFont">
+                <fo:block font-size="9pt">广汽传祺轿车 2010</fo:block>
+                <fo:block font-size="9pt">
+                    <!--<fo:inline><xsl:value-of select="//mainbooktitle"/></fo:inline>-->
+                    <fo:inline><xsl:value-of select="//booktitlealt"/></fo:inline>
+                    <fo:inline> 10.2010</fo:inline>
+                </fo:block>
+            </fo:block-container>
+            
+            <fo:block-container top="4mm" left="153mm"
+                height="10mm" width="16mm" display-align="center" position="absolute" text-align="center">
+                <fo:block font-size="9pt"></fo:block>
+                
+            </fo:block-container>
+            </fo:static-content>
+    </xsl:template>
+    <xsl:template name="insertTocOddFooter">
+        <fo:static-content flow-name="odd-body-footer">
+            <fo:block-container position="absolute" bottom="0mm" left="0mm" height="17mm"
+                width="170mm" display-align="after" text-align="center" padding="0mm">
+                <fo:block-container position="absolute" bottom="7mm" left="0mm" height="10mm"
+                    width="170mm" display-align="before" text-align="center" margin="0mm">
+                    <fo:block font-size="9pt" font-weight="bold">
+                       <fo:inline font-family="Arial">- </fo:inline>
+                       <fo:inline font-family="SIMSUN">目录  </fo:inline>
+                        <fo:page-number/>
+                        <fo:inline font-family="Arial"> -</fo:inline>                                        
+                    </fo:block>
+                </fo:block-container>
+            </fo:block-container>
+            </fo:static-content>
+    </xsl:template>
+ 
+    <xsl:template name="insertTocEvenFooter">
+        <fo:static-content flow-name="even-body-footer">
+            <fo:block-container position="absolute" bottom="0mm" left="0mm" height="17mm"
+                width="170mm" display-align="before" text-align="center" padding="0mm">
+                <fo:block-container position="absolute" bottom="7mm" left="0mm" height="10mm"
+                    width="170mm" display-align="before" text-align="center" margin="0mm">
+                    <fo:block font-size="9pt" font-weight="bold">
+                     <fo:inline font-family="Arial">- </fo:inline>
+                     <fo:inline font-family="SIMSUN">目录  </fo:inline>
+                        <fo:page-number/>
+                     <fo:inline font-family="Arial"> -</fo:inline>
+                    </fo:block>
+                </fo:block-container>
+            </fo:block-container>
+        </fo:static-content>
+    </xsl:template>
+    
+    
+      <!--Preface-->
+
+    <xsl:template name="createFrontMatter">
+        
+    <xsl:if test="//preface">        
+            <fo:page-sequence master-reference="front-matter" xsl:use-attribute-sets="__force__page__count">           
+                
+               <xsl:call-template name="insertFrontMatterStaticContents"/>                
+                <fo:flow flow-name="xsl-region-body">
+               
+                    <fo:block>    
+                        <xsl:apply-templates select="bookmap" mode="preface"/>                   
+                    </fo:block>
+                </fo:flow>
+            </fo:page-sequence>
+     </xsl:if>
+    </xsl:template>
+    
+<xsl:template match="bookmap" mode="preface">
+      <fo:block>
+        <xsl:apply-templates select="$map/*[contains(@class, ' map/topicmeta ')]"></xsl:apply-templates>
+      </fo:block>
+</xsl:template>
+
+
+<!-- To aviod the navtitle be parsed in the preface, change the template match rules of the topicmeta element. this method is not recommanded in the common occurency-->
+<xsl:template match="*[contains(@class, ' map/topicmeta ')]">       
+      <fo:block-container>
+      <fo:block font-family="SIMSUN" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block>
+      <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block><fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block><fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block><fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block><fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block><fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block><fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block>
+    </fo:block-container>
+        <fo:float float="right" clear="right">
+         <fo:block-container position="relative" width="50%">
+           <fo:block>
+                <fo:external-graphic src="url({$artworkPath}/icons/LOGO.GIF)" scaling="uniform" />
+          </fo:block> 
+          </fo:block-container>
+         </fo:float>
+      <fo:block font-family="SIMSUN">样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block>
+            <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block>
+              <fo:float float="left" clear="left">
+         <fo:block-container position="relative">
+           <fo:block>
+                <fo:external-graphic src="url({$artworkPath}/icons/LOGO.GIF)" scaling="uniform" />
+          </fo:block> 
+          </fo:block-container>
+         </fo:float>
+          <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block> <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block> <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block> <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block> <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block> <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block> <fo:block font-family="SIMSUN" writing-mode="tb-rl" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block>
+          <fo:float float="left" clear="left">
+         <fo:block-container position="relative">
+           <fo:block background-color="red" text-align="left">
+                <fo:external-graphic src="url({$artworkPath}/icons/TEST.GIF)" scaling="uniform" width="20%"  content-width="80%" background-color="red"/>
+          </fo:block> 
+          </fo:block-container>
+         </fo:float>
+           <fo:block font-family="SIMSUN" color="red">
+      样式表添加文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+      </fo:block>
+   <fo:float float="left" clear="both">
+         <fo:block-container position="relative">
+           <fo:block background-color="red" text-align="left">
+                <fo:external-graphic src="url({$artworkPath}/image_test/bigmargin.gif)" scaling="uniform" width="20%"  content-width="80%" background-color="red"/>
+          </fo:block> 
+          </fo:block-container>
+         </fo:float>
+        <fo:table space-before.optimum="10mm"  margin="20pt 5pt 5pt 5pt" clear="both" width="170mm">
+        <fo:table-body>
+          <fo:table-row>
+            <fo:table-cell border="1pt black solid" font-family="SIMSUN">
+              <fo:block>表格文字</fo:block>              
+            </fo:table-cell>
+             <fo:table-cell border="1pt black solid" font-family="SIMSUN">
+              <fo:block>表格文字</fo:block> 
+            </fo:table-cell>
+          </fo:table-row>
+          <fo:table-row>
+            <fo:table-cell border="1pt black solid" font-family="SIMSUN">
+              <fo:block>表格文字</fo:block> 
+            </fo:table-cell>
+             <fo:table-cell border="1pt black solid" font-family="SIMSUN">
+            <fo:block>表格文字</fo:block> 
+            </fo:table-cell>
+          </fo:table-row>
+          <fo:table-row>
+          
+          </fo:table-row>
+        </fo:table-body>         
+      </fo:table>
+      
+            <fo:block font-family="SIMSUN" color="red" writing-mode="tb-rl" glyph-orientation-vertical="0deg" direction="ltr">
+             样式表添加文字 zero
+      </fo:block>
+           <fo:block font-family="SIMSUN" color="red" writing-mode="tb-rl" glyph-orientation-vertical="90deg" direction="ltr">
+      样式表添加文字 ninty
+      </fo:block>
+                 <fo:block font-family="SIMSUN" color="red" writing-mode="tb-rl" glyph-orientation-vertical="-90deg" direction="ltr">
+      样式表添加文字 negative ninty
+      </fo:block>
+    
+   <!-- delete these content because of testing the layout
+        <fo:block>
+            <xsl:apply-templates select="//author"/>
+            <xsl:apply-templates select="//copyright"/>
+            <xsl:apply-templates select="//prodinfo"/>
+        </fo:block>
+      -->
+    </xsl:template>
+    
+    <xsl:template match="author"> 
+    <fo:block-container position="absolute" top="140mm" left="140mm"
+                    height="30mm" width="30mm" display-align="before" text-align="end"
+                    margin="0mm">
+   <fo:block language="zh-CN" country="zh-CN" font-family="SIMSUN" id="{@id}" font-size="20pt" vertical-align="text-top">
+    <xsl:value-of select="."/></fo:block>
+    </fo:block-container>
+   </xsl:template>
+
+    
+    
+    <xsl:template match="prodinfo"> 
+            <xsl:apply-templates/>
+   </xsl:template>
+
+     <xsl:template match="prodname[ancestor::prodinfo]">
+        <!--<fo:block-container position="absolute" top="50mm" height="40mm" width="100%" display-align="before" text-align="center">-->
+        
+        <fo:block language="zh-CN" country="zh-CN" font-family="SimHei" id="{@id}"  font-size="36pt" vertical-align="text-top" writing-mode="tb-rl">
+             <xsl:value-of select="."/>
+          </fo:block>
+          
+          <!--</fo:block-container>-->
+    </xsl:template>
+         <xsl:template match="vrmlist[ancestor::prodinfo]">
+        
+        <fo:block language="zh-CN" country="zh-CN" font-family="SimHei" id="{@id}"  font-size="36pt" vertical-align="text-top">
+                          <xsl:apply-templates select="vrm"/>
+          </fo:block>
+   
+    </xsl:template>
+    <xsl:template match="vrm">
+      <fo:block-container position="absolute" top="160mm" left="140mm"
+                    height="30mm" width="30mm" display-align="before" text-align="end"
+                    margin="0mm">
+        <fo:block language="zh-CN" country="zh-CN" font-family="Arial" id="{@id}"  font-size="20pt" vertical-align="text-top">
+             <fo:inline font-family="SIMSUN">文档版本</fo:inline><fo:inline><xsl:apply-templates select="@version"/></fo:inline>
+          </fo:block>
+          </fo:block-container>
+    </xsl:template>
+    
+      <xsl:template match="copyright">
+      <fo:block-container position="absolute" bottom="24mm" height="40mm" width="100%" text-align="center">      
+      <fo:block >      
+      <fo:inline> Copyright ©<xsl:apply-templates select="copyryear"/></fo:inline>
+      <fo:inline><xsl:apply-templates select="copyrholder"/></fo:inline>      
+      </fo:block>   
+      </fo:block-container>       
+    </xsl:template>
+    
+    <xsl:template name="insertFrontMatterStaticContents">
+        <xsl:call-template name="insertFrontMatterOddFooter"/>
+        <xsl:call-template name="insertFrontMatterEvenFooter"/>
+        <xsl:call-template name="insertFrontMatterOddHeader"/>
+        <xsl:call-template name="insertFrontMatterEvenHeader"/>
+
+    </xsl:template>
+
+
+      <xsl:template name="insertFrontMatterOddHeader">       
+    </xsl:template>
+    
+    <xsl:template name="insertFrontMatterEvenHeader">       
+    </xsl:template>
+
+
+
+
+
+	
+
+
+
+<xsl:template match="ol[@outputclass=100]">
+   <fo:table>
+    <fo:table-body>   
+      <xsl:apply-templates/>
+    </fo:table-body>
+   </fo:table>	
+</xsl:template>
+
+</xsl:stylesheet><!-- Stylus Studio meta-information - (c) 2004-2009. Progress Software Corporation. 保留所有权力.
+
+<metaInformation>
+	<scenarios>
+		<scenario default="no" name="场景1" userelativepaths="yes" externalpreview="no" url="..\..\..\..\..\..\DITASAMPLE_GARAGE_SOURCE\concepts\BO_57_1_1.dita" htmlbaseurl="" outputurl="" processortype="saxon8" useresolver="yes" profilemode="0"
+		          profiledepth="" profilelength="" urlprofilexml="" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext="" validateoutput="no"
+		          validator="internal" customvalidator="">
+			<advancedProp name="sInitialMode" value=""/>
+			<advancedProp name="bXsltOneIsOkay" value="true"/>
+			<advancedProp name="bSchemaAware" value="true"/>
+			<advancedProp name="bXml11" value="false"/>
+			<advancedProp name="iValidation" value="0"/>
+			<advancedProp name="bExtensions" value="true"/>
+			<advancedProp name="iWhitespace" value="0"/>
+			<advancedProp name="sInitialTemplate" value=""/>
+			<advancedProp name="bTinyTree" value="true"/>
+			<advancedProp name="bWarnings" value="true"/>
+			<advancedProp name="bUseDTD" value="false"/>
+			<advancedProp name="iErrorHandling" value="fatal"/>
+		</scenario>
+		<scenario default="yes" name="场景2" userelativepaths="yes" externalpreview="no" url="..\..\..\..\..\..\DITASAMPLE_GARAGE_SOURCE\concepts\BO_57_1_1.dita" htmlbaseurl="" outputurl="" processortype="saxon8" useresolver="yes" profilemode="0"
+		          profiledepth="" profilelength="" urlprofilexml="" commandline="" additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext="" validateoutput="no"
+		          validator="internal" customvalidator="">
+			<advancedProp name="sInitialMode" value=""/>
+			<advancedProp name="bXsltOneIsOkay" value="true"/>
+			<advancedProp name="bSchemaAware" value="true"/>
+			<advancedProp name="bXml11" value="false"/>
+			<advancedProp name="iValidation" value="0"/>
+			<advancedProp name="bExtensions" value="true"/>
+			<advancedProp name="iWhitespace" value="0"/>
+			<advancedProp name="sInitialTemplate" value=""/>
+			<advancedProp name="bTinyTree" value="true"/>
+			<advancedProp name="bWarnings" value="true"/>
+			<advancedProp name="bUseDTD" value="false"/>
+			<advancedProp name="iErrorHandling" value="fatal"/>
+		</scenario>
+	</scenarios>
+	<MapperMetaTag>
+		<MapperInfo srcSchemaPathIsRelative="yes" srcSchemaInterpretAsXML="no" destSchemaPath="" destSchemaRoot="" destSchemaPathIsRelative="yes" destSchemaInterpretAsXML="no">
+			<SourceSchema srcSchemaPath="..\..\..\..\..\..\DITASAMPLE_GARAGE_SOURCE\concepts\BO_57_1_1.dita" srcSchemaRoot="concept" AssociatedInstance="" loaderFunction="document" loaderFunctionUsesURI="no"/>
+		</MapperInfo>
+		<MapperBlockPosition>
+			<template name="rootTemplate">
+				<block path="xsl:call-template" x="275" y="0"/>
+				<block path="fo:root/xsl:call-template" x="315" y="18"/>
+				<block path="fo:root/xsl:call-template[1]" x="235" y="18"/>
+				<block path="fo:root/xsl:call-template[2]" x="195" y="18"/>
+				<block path="fo:root/xsl:call-template[3]" x="155" y="18"/>
+				<block path="fo:root/xsl:apply-templates" x="115" y="18"/>
+			</template>
+		</MapperBlockPosition>
+		<TemplateContext></TemplateContext>
+		<MapperFilter side="source"></MapperFilter>
+	</MapperMetaTag>
+</metaInformation>
+-->
